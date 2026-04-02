@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Vehicle {
+  id           String  @id @default(uuid())
+  licensePlate String  @unique
+  model        String
+  year         Int
+  vin          String  @unique
+  available    Boolean @default(true) //is not on a ride
+  isActive     Boolean @default(true) //is not disactivated by admins
+  rides        Ride[]
+}
+
+model User {
+  id       String    @id @default(uuid())
+  name     String
+  email    String    @unique
+  role     UserRole  @default(USER)
+  password String
+  rides    Ride[]
+  sessions Session[]
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  refreshToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+}
+
+model Ride {
+  id         String     @id @default(uuid())
+  userId     String
+  vehicleId  String
+  rideDate   DateTime   @default(now())
+  finishDate DateTime?
+  status     RideStatus @default(ACTIVE)
+  user       User       @relation(fields: [userId], references: [id])
+  vehicle    Vehicle    @relation(fields: [vehicleId], references: [id])
+}
+
+enum RideStatus {
+  ACTIVE
+  RETURNED
+}
