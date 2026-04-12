@@ -11,6 +11,11 @@ export const createVehicleSchema = z.object({
       message: "Year must be at most next year",
     }),
   vin: z.string().min(1, "VIN is required"),
+  pricePerMinuteCents: z
+    .number()
+    .int("Price must be an integer (cents)")
+    .min(0, "Price cannot be negative")
+    .max(10000, "Price exceeds maximum allowed limit ($100/min)"),
 });
 
 export const updateVehicleSchema = z.object({
@@ -25,6 +30,12 @@ export const updateVehicleSchema = z.object({
     })
     .optional(),
   vin: z.string().min(1).optional(),
+  pricePerMinuteCents: z
+    .number()
+    .int("Price must be an integer (cents)")
+    .min(0, "Price cannot be negative")
+    .max(10000, "Price exceeds maximum allowed limit ($100/min)")
+    .optional(),
 });
 
 export const VehicleParamsSchema = z.object({

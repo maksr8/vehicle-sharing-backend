@@ -13,14 +13,15 @@ datasource db {
 }
 
 model Vehicle {
-  id           String  @id @default(uuid())
-  licensePlate String  @unique
-  model        String
-  year         Int
-  vin          String  @unique
-  available    Boolean @default(true) //is not on a ride
-  isActive     Boolean @default(true) //is not disactivated by admins
-  rides        Ride[]
+  id                  String  @id @default(uuid())
+  licensePlate        String  @unique
+  model               String
+  year                Int
+  vin                 String  @unique
+  available           Boolean @default(true) //is not on a ride
+  isActive            Boolean @default(true) //is not disactivated by admins
+  pricePerMinuteCents Int     @default(0)
+  rides               Ride[]
 }
 
 model User {
@@ -48,17 +49,18 @@ model Session {
 }
 
 model Ride {
-  id         String     @id @default(uuid())
-  userId     String
-  vehicleId  String
-  rideDate   DateTime   @default(now())
-  finishDate DateTime?
-  status     RideStatus @default(ACTIVE)
-  user       User       @relation(fields: [userId], references: [id])
-  vehicle    Vehicle    @relation(fields: [vehicleId], references: [id])
+  id             String     @id @default(uuid())
+  userId         String
+  vehicleId      String
+  rideDate       DateTime   @default(now())
+  finishDate     DateTime?
+  status         RideStatus @default(ACTIVE)
+  totalCostCents Int?
+  user           User       @relation(fields: [userId], references: [id])
+  vehicle        Vehicle    @relation(fields: [vehicleId], references: [id])
 }
 
 enum RideStatus {
   ACTIVE
-  RETURNED
+  FINISHED
 }

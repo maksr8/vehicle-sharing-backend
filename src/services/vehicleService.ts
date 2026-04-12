@@ -52,6 +52,8 @@ export async function updateVehicle(
   if (dto.model !== undefined) updateData.model = dto.model;
   if (dto.year !== undefined) updateData.year = dto.year;
   if (dto.vin !== undefined) updateData.vin = dto.vin;
+  if (dto.pricePerMinuteCents !== undefined)
+    updateData.pricePerMinuteCents = dto.pricePerMinuteCents;
 
   try {
     return await prisma.vehicle.update({

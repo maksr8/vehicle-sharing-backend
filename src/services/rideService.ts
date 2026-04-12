@@ -76,7 +76,7 @@ export async function finishRide(
 ): Promise<Ride> {
   const ride = await prisma.ride.findUnique({
     where: { id: rideId },
-    select: { status: true, vehicleId: true, userId: true },
+    include: { vehicle: { select: { pricePerMinuteCents: true } } },
   });
 
   if (!ride) throw new AppError(404, "Ride not found");
@@ -85,16 +85,25 @@ export async function finishRide(
     throw new AppError(403, "You can only finish your own rides");
   }
 
-  if (ride.status === RideStatus.RETURNED) {
+  if (ride.status === RideStatus.FINISHED) {
     throw new AppError(409, "Ride is already finished");
   }
+
+  const finishDate = new Date();
+  const durationMs = finishDate.getTime() - ride.rideDate.getTime();
+
+  const durationMinutes = Math.max(1, Math.ceil(durationMs / (1000 * 60)));
+
+  const calculatedCostCents =
+    durationMinutes * ride.vehicle.pricePerMinuteCents;
 
   const [updatedRide] = await prisma.$transaction([
     prisma.ride.update({
       where: { id: rideId },
       data: {
-        status: RideStatus.RETURNED,
-        finishDate: new Date(),
+        status: RideStatus.FINISHED,
+        finishDate: finishDate,
+        totalCostCents: calculatedCostCents,
       },
     }),
     prisma.vehicle.update({
