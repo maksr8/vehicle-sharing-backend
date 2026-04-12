@@ -6,7 +6,12 @@ import cors from "cors";
 
 export const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 
 app.get("/", (_req: Request, res: Response) => {
   res.json({ message: "Vehicle Sharing API" });
