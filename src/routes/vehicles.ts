@@ -13,10 +13,11 @@ import { requireAuth } from "../middleware/auth.js";
 
 export const vehiclesRouter = express.Router();
 
-vehiclesRouter.get("/", vehicleController.getVehicles);
+vehiclesRouter.get("/", requireAuth, vehicleController.getVehicles);
 
 vehiclesRouter.get(
   "/:id",
+  requireAuth,
   validate(VehicleParamsSchema, "params"),
   vehicleController.getVehicleById,
 );
