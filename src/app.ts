@@ -3,6 +3,7 @@ import { routes } from "./routes/index.js";
 import cors from "cors";
 
 export const app = express();
+const apiTransport = (process.env.API_TRANSPORT || "rest").toLowerCase();
 
 app.use(
   cors({
@@ -15,4 +16,6 @@ app.get("/", (_req: Request, res: Response) => {
   res.json({ message: "Vehicle Sharing API" });
 });
 
-app.use("/api", routes);
+if (apiTransport !== "graphql") {
+  app.use("/api", routes);
+}

@@ -8,6 +8,10 @@ import { notFoundHandler } from "./middleware/notFound.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const PORT = process.env.SERVER_PORT;
+const apiTransport = (process.env.API_TRANSPORT || "rest").toLowerCase();
+if (apiTransport !== "rest" && apiTransport !== "graphql") {
+  throw new Error("Invalid API_TRANSPORT value. Use either 'rest' or 'graphql'.");
+}
 
 const server = http.createServer(app);
 
@@ -20,6 +24,6 @@ app.use(errorHandler);
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`NODE_ENV mode ${process.env.NODE_ENV}`);
-  console.log(`API transport mode ${process.env.API_TRANSPORT || "both"}`);
+  console.log(`API transport mode ${apiTransport}`);
   startSessionCleanupJob();
 });

@@ -1,6 +1,5 @@
 Backend for vehicle sharing web app.
 
 Transport toggle:
-- REST (`/api`) is always enabled.
-- Set `API_TRANSPORT=rest` to disable GraphQL.
-- Set `API_TRANSPORT=graphql` or `API_TRANSPORT=both` to enable GraphQL at `/graphql`.
+- Set `API_TRANSPORT=rest` for REST only (`/api`).
+- Set `API_TRANSPORT=graphql` for GraphQL only (`/graphql`).
