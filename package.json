@@ -10,6 +10,9 @@
     "dev": "tsx watch src/server.ts",
     "watch": "tsc --watch"
   },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/maksr8/lib-man-sys-nodejs.git"
