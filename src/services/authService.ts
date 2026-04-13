@@ -37,20 +37,20 @@ export async function register(dto: RegisterDto): Promise<{ message: string }> {
 
   const testAccount = await nodemailer.createTestAccount();
   const transporter = nodemailer.createTransport({
-    host: "smtp.ethereal.email",
-    port: 587,
-    secure: false,
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT!),
+    secure: parseInt(process.env.SMTP_PORT!) === 465,
     auth: {
-      user: testAccount.user,
-      pass: testAccount.pass,
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASSWORD,
     },
   });
 
   const info = await transporter.sendMail({
-    from: '"Vehicle Share" <admin@vehicleshare.com>',
+    from: process.env.SMTP_USER,
     to: dto.email,
     subject: "Verify your account",
-    html: `<p>Click here to finish registration:</p> <a href="${process.env.FRONTEND_URL}/verify?token=${registrationToken}">Activate Account</a>`,
+    html: `<p>Click here to finish registration:</p> <a href="${process.env.FRONTEND_URL}/verify?token=${registrationToken}">Activate Account</a><p>If the link doesn't work, copy and paste the following URL into your browser:</p><p>${process.env.FRONTEND_URL}/verify?token=${registrationToken}</p>`,
   });
 
   console.log("PREVIEW EMAIL URL: %s", nodemailer.getTestMessageUrl(info));
