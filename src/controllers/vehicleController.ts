@@ -6,6 +6,7 @@ import type {
 } from "../schemas/vehicle.schema.js";
 import * as vehicleService from "../services/vehicleService.js";
 import type { UserRole } from "../generated/prisma/enums.js";
+import { emitFleetUpdate } from "../socket.js";
 
 export async function getVehicles(req: Request, res: Response) {
   const vehicles = await vehicleService.getAllVehicles(
@@ -27,6 +28,7 @@ export async function createVehicle(
   res: Response,
 ) {
   const vehicle = await vehicleService.createVehicle(req.body);
+  emitFleetUpdate();
   res.status(201).json({ data: vehicle });
 }
 
@@ -35,6 +37,7 @@ export async function updateVehicle(
   res: Response,
 ) {
   const vehicle = await vehicleService.updateVehicle(req.params.id, req.body);
+  emitFleetUpdate();
   res.json({ data: vehicle });
 }
 
@@ -43,6 +46,7 @@ export async function switchIsActive(
   res: Response,
 ) {
   const vehicle = await vehicleService.switchIsActive(req.params.id);
+  emitFleetUpdate();
   res.json({ data: vehicle });
 }
 
@@ -51,5 +55,6 @@ export async function deleteVehicle(
   res: Response,
 ) {
   await vehicleService.deleteVehicle(req.params.id);
+  emitFleetUpdate();
   res.status(204).end();
 }

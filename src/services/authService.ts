@@ -50,8 +50,7 @@ export async function register(dto: RegisterDto): Promise<{ message: string }> {
     from: '"Vehicle Share" <admin@vehicleshare.com>',
     to: dto.email,
     subject: "Verify your account",
-    // This URL assumes Vite frontend runs on port 5173
-    html: `<p>Click here to finish registration:</p> <a href="http://localhost:5173/verify?token=${registrationToken}">Activate Account</a>`,
+    html: `<p>Click here to finish registration:</p> <a href="${process.env.FRONTEND_URL}/verify?token=${registrationToken}">Activate Account</a>`,
   });
 
   console.log("PREVIEW EMAIL URL: %s", nodemailer.getTestMessageUrl(info));
