@@ -4,14 +4,49 @@ import type {
   CreateVehicleDto,
   UpdateVehicleDto,
 } from "../schemas/vehicle.schema.js";
+import type { PaginatedResult } from "../types/pagination.js";
 import { AppError } from "../utils/AppError.js";
 
-export async function getAllVehicles(role: UserRole): Promise<Vehicle[]> {
-  const whereClause = role === UserRole.ADMIN ? {} : { isActive: true };
+export async function getAllVehicles(
+  role: UserRole,
+  page?: number,
+  limit?: number,
+): Promise<PaginatedResult<Vehicle>> {
+  const whereClause =
+    role === UserRole.ADMIN ? {} : { isActive: true, available: true };
 
-  return await prisma.vehicle.findMany({
-    where: whereClause,
-  });
+  if (!page || !limit) {
+    const data = await prisma.vehicle.findMany({
+      where: whereClause,
+      orderBy: { model: "asc" },
+    });
+    return {
+      data,
+      meta: { total: data.length, page: 1, limit: data.length, totalPages: 1 },
+    };
+  }
+
+  const skip = (page - 1) * limit;
+
+  const [data, total] = await prisma.$transaction([
+    prisma.vehicle.findMany({
+      where: whereClause,
+      skip,
+      take: limit,
+      orderBy: { model: "asc" },
+    }),
+    prisma.vehicle.count({ where: whereClause }),
+  ]);
+
+  return {
+    data,
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 }
 
 export async function getVehicleById(id: string): Promise<Vehicle> {

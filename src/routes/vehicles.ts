@@ -10,10 +10,16 @@ import {
 import { requireRole } from "../middleware/role.js";
 import { UserRole } from "../generated/prisma/enums.js";
 import { requireAuth } from "../middleware/auth.js";
+import { paginationQuerySchema } from "../schemas/pagination.schema.js";
 
 export const vehiclesRouter = express.Router();
 
-vehiclesRouter.get("/", requireAuth, vehicleController.getVehicles);
+vehiclesRouter.get(
+  "/",
+  requireAuth,
+  validate(paginationQuerySchema, "query"),
+  vehicleController.getVehicles,
+);
 
 vehiclesRouter.get(
   "/:id",

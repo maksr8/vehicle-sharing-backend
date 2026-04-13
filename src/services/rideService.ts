@@ -6,17 +6,50 @@ import {
 } from "../generated/prisma/client.js";
 import { prisma } from "../db/prisma.js";
 import { AppError } from "../utils/AppError.js";
+import type { PaginatedResult } from "../types/pagination.js";
 
 export async function getAllRides(
   userId: string,
   role: UserRole,
-): Promise<Ride[]> {
+  page?: number,
+  limit?: number,
+): Promise<PaginatedResult<Ride>> {
   const whereClause = role === UserRole.ADMIN ? {} : { userId };
 
-  return await prisma.ride.findMany({
-    where: whereClause,
-    include: { vehicle: true },
-  });
+  if (!page || !limit) {
+    const data = await prisma.ride.findMany({
+      where: whereClause,
+      include: { vehicle: true },
+      orderBy: { rideDate: "desc" },
+    });
+    return {
+      data,
+      meta: { total: data.length, page: 1, limit: data.length, totalPages: 1 },
+    };
+  }
+
+  const skip = (page - 1) * limit;
+
+  const [data, total] = await prisma.$transaction([
+    prisma.ride.findMany({
+      where: whereClause,
+      include: { vehicle: true },
+      skip,
+      take: limit,
+      orderBy: { rideDate: "desc" },
+    }),
+    prisma.ride.count({ where: whereClause }),
+  ]);
+
+  return {
+    data,
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 }
 
 export async function createRide(

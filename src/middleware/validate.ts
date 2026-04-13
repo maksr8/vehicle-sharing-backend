@@ -6,7 +6,19 @@ export function validate<T>(
   target: "body" | "params" | "query" = "body",
 ) {
   return (req: Request, _res: Response, next: NextFunction) => {
-    req[target] = schema.parse(req[target]);
-    next();
+    try {
+      const parsedData = schema.parse(req[target]);
+
+      Object.defineProperty(req, target, {
+        value: parsedData,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+
+      next();
+    } catch (error) {
+      next(error);
+    }
   };
 }

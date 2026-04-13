@@ -7,12 +7,17 @@ import type {
 import * as vehicleService from "../services/vehicleService.js";
 import type { UserRole } from "../generated/prisma/enums.js";
 import { emitFleetUpdate } from "../socket.js";
+import type { PaginationQueryDto } from "../schemas/pagination.schema.js";
 
 export async function getVehicles(req: Request, res: Response) {
-  const vehicles = await vehicleService.getAllVehicles(
+  const query = req.query as PaginationQueryDto;
+  const result = await vehicleService.getAllVehicles(
     req.user!.role as UserRole,
+    query.page,
+    query.limit,
   );
-  res.json({ data: vehicles });
+
+  res.json(result);
 }
 
 export async function getVehicleById(

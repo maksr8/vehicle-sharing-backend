@@ -4,10 +4,16 @@ import { jsonParser } from "../middleware/jsonParser.js";
 import { validate } from "../middleware/validate.js";
 import { createRideSchema, RideParamsSchema } from "../schemas/ride.schema.js";
 import { requireAuth } from "../middleware/auth.js";
+import { paginationQuerySchema } from "../schemas/pagination.schema.js";
 
 export const ridesRouter = express.Router();
 
-ridesRouter.get("/", requireAuth, rideController.getRides);
+ridesRouter.get(
+  "/",
+  requireAuth,
+  validate(paginationQuerySchema, "query"),
+  rideController.getRides,
+);
 
 ridesRouter.post(
   "/",

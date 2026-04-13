@@ -3,12 +3,20 @@ import type { CreateRideDto, RideParamsDto } from "../schemas/ride.schema.js";
 import * as rideService from "../services/rideService.js";
 import type { UserRole } from "../generated/prisma/enums.js";
 import { emitFleetUpdate } from "../socket.js";
+import type { PaginationQueryDto } from "../schemas/pagination.schema.js";
 
 export async function getRides(req: Request, res: Response) {
   const { userId, role } = req.user!;
+  const query = req.query as PaginationQueryDto;
 
-  const rides = await rideService.getAllRides(userId, role as UserRole);
-  res.json({ data: rides });
+  const result = await rideService.getAllRides(
+    userId,
+    role as UserRole,
+    query.page,
+    query.limit,
+  );
+
+  res.json(result);
 }
 
 export async function createRide(
