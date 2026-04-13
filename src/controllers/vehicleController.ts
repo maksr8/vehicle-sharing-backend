@@ -15,6 +15,11 @@ export async function getVehicles(req: Request, res: Response) {
     req.user!.role as UserRole,
     query.page,
     query.limit,
+    {
+      ...(query.search !== undefined && { search: query.search }),
+      ...(query.maxPrice !== undefined && { maxPrice: query.maxPrice }),
+      ...(query.available !== undefined && { available: query.available }),
+    },
   );
 
   res.json(result);

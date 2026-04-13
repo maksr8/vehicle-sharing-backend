@@ -7,13 +7,47 @@ import type {
 import type { PaginatedResult } from "../types/pagination.js";
 import { AppError } from "../utils/AppError.js";
 
+type VehicleListFilters = {
+  search?: string;
+  maxPrice?: number;
+  available?: boolean;
+};
+
 export async function getAllVehicles(
   role: UserRole,
   page?: number,
   limit?: number,
+  filters: VehicleListFilters = {},
 ): Promise<PaginatedResult<Vehicle>> {
-  const whereClause =
-    role === UserRole.ADMIN ? {} : { isActive: true, available: true };
+  const whereClause: Prisma.VehicleWhereInput = {};
+
+  if (role === UserRole.ADMIN) {
+    if (filters.available !== undefined) {
+      whereClause.available = filters.available;
+    }
+  } else {
+    whereClause.isActive = true;
+    whereClause.available = true;
+    if (filters.maxPrice !== undefined) {
+      whereClause.pricePerMinuteCents = { lte: filters.maxPrice };
+    }
+  }
+
+  const normalizedSearch = filters.search?.trim();
+  if (normalizedSearch) {
+    const searchConditions: Prisma.VehicleWhereInput[] = [
+      { licensePlate: { contains: normalizedSearch, mode: "insensitive" } },
+      { model: { contains: normalizedSearch, mode: "insensitive" } },
+      { vin: { contains: normalizedSearch, mode: "insensitive" } },
+    ];
+
+    const numericYear = Number.parseInt(normalizedSearch, 10);
+    if (!Number.isNaN(numericYear)) {
+      searchConditions.push({ year: numericYear });
+    }
+
+    whereClause.OR = searchConditions;
+  }
 
   if (!page || !limit) {
     const data = await prisma.vehicle.findMany({
