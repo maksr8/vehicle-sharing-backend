@@ -51,6 +51,7 @@ export async function createRide(
           userId: userId,
           vehicleId: vehicleId,
         },
+        include: { vehicle: true },
       }),
       prisma.vehicle.update({
         where: { id: vehicleId },
@@ -105,6 +106,7 @@ export async function finishRide(
         finishDate: finishDate,
         totalCostCents: calculatedCostCents,
       },
+      include: { vehicle: true },
     }),
     prisma.vehicle.update({
       where: { id: ride.vehicleId },
