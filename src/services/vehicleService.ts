@@ -1,5 +1,10 @@
 import { prisma } from "../db/prisma.js";
-import { Prisma, UserRole, type Vehicle } from "../generated/prisma/client.js";
+import {
+  Prisma,
+  RideStatus,
+  UserRole,
+  type Vehicle,
+} from "../generated/prisma/client.js";
 import type {
   CreateVehicleDto,
   UpdateVehicleDto,
@@ -118,6 +123,21 @@ export async function updateVehicle(
   id: string,
   dto: UpdateVehicleDto,
 ): Promise<Vehicle> {
+  const activeRide = await prisma.ride.findFirst({
+    where: {
+      vehicleId: id,
+      status: RideStatus.ACTIVE,
+    },
+    select: { id: true },
+  });
+
+  if (activeRide) {
+    throw new AppError(
+      409,
+      "Cannot update vehicle while it has an active ride",
+    );
+  }
+
   const updateData: Prisma.VehicleUpdateInput = {};
   if (dto.licensePlate !== undefined)
     updateData.licensePlate = dto.licensePlate;
