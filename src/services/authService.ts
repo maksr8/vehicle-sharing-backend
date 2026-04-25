@@ -138,11 +138,14 @@ export async function refresh(
   }
 
   if (session.expiresAt < new Date()) {
-    await prisma.session.delete({ where: { id: session.id } });
+    await prisma.session.deleteMany({ where: { id: session.id } });
     throw new AppError(401, "Refresh token expired. Please login again");
   }
 
-  await prisma.session.delete({ where: { id: session.id } });
+  const deleted = await prisma.session.deleteMany({ where: { id: session.id } });
+  if (deleted.count === 0) {
+    throw new AppError(401, "Refresh token is no longer valid. Please login again");
+  }
 
   const tokens = await generateAuthSession(
     session.user.id,
