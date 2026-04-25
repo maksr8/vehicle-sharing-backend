@@ -104,7 +104,10 @@ export async function createVehicle(dto: CreateVehicleDto): Promise<Vehicle> {
   } catch (error: unknown) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
-        throw new AppError(409, "Vehicle with this VIN already exists");
+        throw new AppError(
+          409,
+          "Vehicle with this VIN or license plate already exists",
+        );
       }
     }
     throw error;
@@ -135,7 +138,10 @@ export async function updateVehicle(
         throw new AppError(404, "Vehicle not found");
       }
       if (error.code === "P2002") {
-        throw new AppError(409, "Another vehicle with this VIN already exists");
+        throw new AppError(
+          409,
+          "Another vehicle with this VIN or license plate already exists",
+        );
       }
     }
     throw error;
